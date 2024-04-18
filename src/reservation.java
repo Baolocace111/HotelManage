@@ -1,7 +1,9 @@
 
+import java.awt.event.ActionEvent;
 import javax.swing.JFrame;
 import java.sql.*;
 import java.text.SimpleDateFormat;
+import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 
 /*
@@ -45,13 +47,13 @@ public class reservation extends javax.swing.JFrame {
         txtName = new javax.swing.JTextField();
         txtPhone = new javax.swing.JTextField();
         jLabel4 = new javax.swing.JLabel();
-        txtRoomNo = new javax.swing.JTextField();
         jLabel5 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
         comboRoom = new javax.swing.JComboBox<>();
         jLabel7 = new javax.swing.JLabel();
         Date = new com.toedter.calendar.JDateChooser();
         jButton1 = new javax.swing.JButton();
+        comboroomno = new javax.swing.JComboBox<>();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -97,8 +99,6 @@ public class reservation extends javax.swing.JFrame {
         jLabel4.setForeground(new java.awt.Color(204, 255, 255));
         jLabel4.setText("Phone:");
 
-        txtRoomNo.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-
         jLabel5.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel5.setForeground(new java.awt.Color(204, 255, 255));
         jLabel5.setText("RoomNo:");
@@ -108,6 +108,11 @@ public class reservation extends javax.swing.JFrame {
         jLabel6.setText("Room Type:");
 
         comboRoom.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "None", "Single", "Double", "Luxury", "Delux", "Family" }));
+        comboRoom.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                comboRoomActionPerformed(evt);
+            }
+        });
 
         jLabel7.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel7.setForeground(new java.awt.Color(204, 255, 255));
@@ -122,6 +127,13 @@ public class reservation extends javax.swing.JFrame {
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton1ActionPerformed(evt);
+            }
+        });
+
+        comboroomno.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "None" }));
+        comboroomno.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                comboroomnoActionPerformed(evt);
             }
         });
 
@@ -151,8 +163,8 @@ public class reservation extends javax.swing.JFrame {
                             .addComponent(jLabel5))))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(backgroundLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(comboRoom, javax.swing.GroupLayout.PREFERRED_SIZE, 161, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtRoomNo, javax.swing.GroupLayout.PREFERRED_SIZE, 161, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(comboRoom, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 161, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(comboroomno, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 161, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(82, 82, 82))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, backgroundLayout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -177,8 +189,8 @@ public class reservation extends javax.swing.JFrame {
                 .addGroup(backgroundLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel4)
                     .addComponent(txtPhone, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtRoomNo, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel5))
+                    .addComponent(jLabel5)
+                    .addComponent(comboroomno, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 29, Short.MAX_VALUE)
                 .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -208,14 +220,21 @@ public class reservation extends javax.swing.JFrame {
             pst.setString(1, txtName.getText());
             pst.setLong(2,Long.parseLong(txtPhone.getText()));
             pst.setString(3, comboRoom.getSelectedItem().toString());
-            pst.setInt(4, Integer.parseInt(txtRoomNo.getText()));
+            pst.setInt(4, Integer.parseInt(comboroomno.getSelectedItem().toString()));
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             String regDate = dateFormat.format(Date.getDate());
             pst.setString(5, regDate);
             pst.executeUpdate();
             
+            qry = "UPDATE room SET status = 'Occupied' WHERE room_number = ?";
+            pst = conn.prepareStatement(qry);
+            pst.setInt(1, Integer.parseInt(comboroomno.getSelectedItem().toString()));
+            pst.executeUpdate();
+            
             JOptionPane.showMessageDialog(null, "Room Has been reserved");
             
+            pst.close();
+            conn.close();
         }
         catch(Exception e)
         {
@@ -223,6 +242,39 @@ public class reservation extends javax.swing.JFrame {
         }
 
     }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void comboroomnoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_comboroomnoActionPerformed
+        
+    }//GEN-LAST:event_comboroomnoActionPerformed
+
+    private void comboRoomActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_comboRoomActionPerformed
+        comboRoom.addActionListener((ActionEvent e) -> {
+            conn = mySqlConnection.ConnectDB();
+            JComboBox comboBox = (JComboBox) e.getSource();
+            String selectedRoomType = (String) comboBox.getSelectedItem();
+            String sql = "SELECT room_number FROM room WHERE room_type = ? AND status = 'Available'";
+            
+            try {
+                pst = conn.prepareStatement(sql);
+                pst.setString(1, selectedRoomType);
+                
+                ResultSet result = pst.executeQuery();
+                
+                comboroomno.removeAllItems(); // Clear existing items
+                
+                while (result.next()) {
+                    int roomNumber = result.getInt("room_number");
+                    comboroomno.addItem(String.valueOf(roomNumber));
+                }
+                
+                
+                pst.close();
+                conn.close();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        });
+    }//GEN-LAST:event_comboRoomActionPerformed
 
     /**
      * @param args the command line arguments
@@ -265,6 +317,7 @@ public class reservation extends javax.swing.JFrame {
     private com.toedter.calendar.JDateChooser Date;
     private javax.swing.JPanel background;
     private javax.swing.JComboBox<String> comboRoom;
+    private javax.swing.JComboBox<String> comboroomno;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
@@ -276,6 +329,5 @@ public class reservation extends javax.swing.JFrame {
     private javax.swing.JPanel top;
     private javax.swing.JTextField txtName;
     private javax.swing.JTextField txtPhone;
-    private javax.swing.JTextField txtRoomNo;
     // End of variables declaration//GEN-END:variables
 }

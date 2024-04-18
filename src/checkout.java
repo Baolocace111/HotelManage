@@ -1,14 +1,17 @@
 
+import java.awt.event.ActionEvent;
 import java.awt.print.PrinterException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
@@ -125,8 +128,8 @@ public class checkout extends javax.swing.JFrame {
         combocity.setSelectedItem(dataList().get(index).getcity());
         txtadult.setText(Integer.toString(dataList().get(index).getadult()));
         txtchildren.setText(Integer.toString(dataList().get(index).getchildren()));
-        comboroomtype.setSelectedItem(dataList ().get(index).getroomtype());
-        txtroomno.setText(Integer.toString(dataList().get(index).getroomno()));
+        comboroomtype.setSelectedItem(dataList().get(index).getroomtype());
+        comboroomno.setSelectedItem(Integer.toString(dataList().get(index).getroomno()));
         txtroomcost.setText(Float.toString(dataList().get(index).getroomcost()));
         txttax.setText(Float.toString(dataList().get(index).gettaxes()));
         lblTotal.setText(Float.toString(dataList().get(index).gettotal()));
@@ -175,7 +178,6 @@ public class checkout extends javax.swing.JFrame {
         jLabel16 = new javax.swing.JLabel();
         jLabel17 = new javax.swing.JLabel();
         comboroomtype = new javax.swing.JComboBox<>();
-        txtroomno = new javax.swing.JTextField();
         txtroomcost = new javax.swing.JTextField();
         txttax = new javax.swing.JTextField();
         lblTotal = new javax.swing.JLabel();
@@ -190,6 +192,7 @@ public class checkout extends javax.swing.JFrame {
         combocountry = new javax.swing.JComboBox<>();
         outDate = new com.toedter.calendar.JDateChooser();
         jLabel18 = new javax.swing.JLabel();
+        comboroomno = new javax.swing.JComboBox<>();
 
         searchBox.setBackground(new java.awt.Color(33, 55, 116));
         searchBox.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
@@ -298,7 +301,7 @@ public class checkout extends javax.swing.JFrame {
 
         jLabel8.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel8.setForeground(new java.awt.Color(204, 255, 255));
-        jLabel8.setText("Father:");
+        jLabel8.setText("Surname:");
 
         jLabel9.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel9.setForeground(new java.awt.Color(204, 255, 255));
@@ -349,16 +352,9 @@ public class checkout extends javax.swing.JFrame {
         jLabel17.setText("Total:");
 
         comboroomtype.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "None", "Single", "Double", "Luxury", "Delux", "Family" }));
-
-        txtroomno.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        txtroomno.addActionListener(new java.awt.event.ActionListener() {
+        comboroomtype.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtroomnoActionPerformed(evt);
-            }
-        });
-        txtroomno.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                txtroomnoKeyReleased(evt);
+                comboroomtypeActionPerformed(evt);
             }
         });
 
@@ -483,6 +479,13 @@ public class checkout extends javax.swing.JFrame {
         jLabel18.setForeground(new java.awt.Color(204, 255, 255));
         jLabel18.setText("Check Out Date:");
 
+        comboroomno.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "None" }));
+        comboroomno.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                comboroomnoActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -498,10 +501,10 @@ public class checkout extends javax.swing.JFrame {
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(jLabel8)
                                     .addComponent(jLabel3))
-                                .addGap(50, 50, 50)
+                                .addGap(36, 36, 36)
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(txtname, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(txtfather, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                    .addComponent(txtfather, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(txtname, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)))
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addGroup(jPanel1Layout.createSequentialGroup()
@@ -524,7 +527,7 @@ public class checkout extends javax.swing.JFrame {
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addGap(20, 20, 20)
                                 .addComponent(btnSave)))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 32, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 39, Short.MAX_VALUE)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel14)
                             .addComponent(lblcity)
@@ -532,21 +535,21 @@ public class checkout extends javax.swing.JFrame {
                             .addComponent(jLabel4)
                             .addComponent(jLabel13))
                         .addGap(40, 40, 40)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtphone, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(txtphone)
                             .addComponent(combocity, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtadult, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtchildren, javax.swing.GroupLayout.PREFERRED_SIZE, 161, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(combocountry, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(42, 42, 42)
+                            .addComponent(txtadult)
+                            .addComponent(combocountry, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(txtchildren))
+                        .addGap(45, 45, 45)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addComponent(jLabel5)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(txtroomno, javax.swing.GroupLayout.PREFERRED_SIZE, 161, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(comboroomno, javax.swing.GroupLayout.PREFERRED_SIZE, 161, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addComponent(jLabel6)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 31, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 24, Short.MAX_VALUE)
                                 .addComponent(comboroomtype, javax.swing.GroupLayout.PREFERRED_SIZE, 161, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addComponent(jLabel15)
@@ -602,7 +605,7 @@ public class checkout extends javax.swing.JFrame {
                         .addComponent(txtfather, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jLabel11)
                         .addComponent(jLabel5)
-                        .addComponent(txtroomno, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(comboroomno, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(combocountry))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -671,10 +674,6 @@ public class checkout extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void txtroomnoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtroomnoActionPerformed
-        
-    }//GEN-LAST:event_txtroomnoActionPerformed
-
     private void txtroomcostActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtroomcostActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txtroomcostActionPerformed
@@ -706,11 +705,16 @@ public class checkout extends javax.swing.JFrame {
             pst.setString(10, txtadult.getText());
             pst.setString(11, txtchildren.getText());
             pst.setString(12, comboroomtype.getSelectedItem().toString());
-            pst.setInt(13, Integer.parseInt(txtroomno.getText()));
+            pst.setInt(13, Integer.parseInt(comboroomno.getSelectedItem().toString()));
             pst.setFloat(14, Float.parseFloat(txtroomcost.getText()));
             pst.setFloat(15, Float.parseFloat(txttax.getText()));
             pst.setFloat(16, Float.parseFloat(lblTotal.getText()));
             
+            pst.executeUpdate();
+            
+            str = "UPDATE room SET status = 'Available' WHERE room_number = ?";
+            pst = conn.prepareStatement(str);
+            pst.setInt(1, Integer.parseInt(comboroomno.getSelectedItem().toString()));
             pst.executeUpdate();
             
             JOptionPane.showMessageDialog(null, "Customer "+txtname.getText()+" Has been Checked out");
@@ -723,7 +727,7 @@ public class checkout extends javax.swing.JFrame {
             showTable();
             txtname.setText(null);txtfather.setText(null);txtaddress.setText(null);txtnic.setText(null);Date.setDate(null);
             txtphone.setText(null);combocountry.setSelectedItem(null);combocity.setSelectedItem(null);txtphone.setText(null);
-            txtadult.setText(null);txtchildren.setText(null);comboroomtype.setSelectedItem(null);txtroomno.setText(null);
+            txtadult.setText(null);txtchildren.setText(null);comboroomtype.setSelectedItem(null);comboroomno.setSelectedItem(null);
             txttax.setText(null);txtroomcost.setText(null);lblTotal.setText("0.00");
             conn.close();
         }
@@ -756,7 +760,7 @@ public class checkout extends javax.swing.JFrame {
             pst.setString(9, txtadult.getText());
             pst.setString(10, txtchildren.getText());
             pst.setString(11, comboroomtype.getSelectedItem().toString());
-            pst.setInt(12, Integer.parseInt(txtroomno.getText()));
+            pst.setInt(12, Integer.parseInt(comboroomno.getSelectedItem().toString()));
             pst.setFloat(13, Float.parseFloat(txtroomcost.getText()));
             pst.setFloat(14, Float.parseFloat(txttax.getText()));
             pst.setFloat(15, Float.parseFloat(lblTotal.getText()));
@@ -771,7 +775,7 @@ public class checkout extends javax.swing.JFrame {
             showTable();
             txtname.setText(null);txtfather.setText(null);txtaddress.setText(null);txtnic.setText(null);Date.setDate(null);
             txtphone.setText(null);combocountry.setSelectedItem(null);combocity.setSelectedItem(null);txtphone.setText(null);
-            txtadult.setText(null);txtchildren.setText(null);comboroomtype.setSelectedItem(null);txtroomno.setText(null);
+            txtadult.setText(null);txtchildren.setText(null);comboroomtype.setSelectedItem(null);comboroomno.setSelectedItem(null);
             txttax.setText(null);txtroomcost.setText(null);lblTotal.setText("0.00");
             conn.close();
         }
@@ -859,10 +863,6 @@ public class checkout extends javax.swing.JFrame {
         showItems(pos);
     }//GEN-LAST:event_btn_backward1ActionPerformed
 
-    private void txtroomnoKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtroomnoKeyReleased
-        
-    }//GEN-LAST:event_txtroomnoKeyReleased
-
     
     private void txtroomcostKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtroomcostKeyReleased
         
@@ -900,9 +900,43 @@ public class checkout extends javax.swing.JFrame {
         showTable();
         txtname.setText(null);txtfather.setText(null);txtaddress.setText(null);txtnic.setText(null);Date.setDate(null);
             txtphone.setText(null);combocountry.setSelectedItem(null);combocity.setSelectedItem(null);txtphone.setText(null);
-            txtadult.setText(null);txtchildren.setText(null);comboroomtype.setSelectedItem(null);txtroomno.setText(null);
+            txtadult.setText(null);txtchildren.setText(null);comboroomtype.setSelectedItem(null);comboroomno.setSelectedItem(null);
             txttax.setText(null);txtroomcost.setText(null);lblTotal.setText("0.00");
     }//GEN-LAST:event_btn_refresh1ActionPerformed
+
+    private void comboroomnoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_comboroomnoActionPerformed
+        
+    }//GEN-LAST:event_comboroomnoActionPerformed
+
+    private void comboroomtypeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_comboroomtypeActionPerformed
+        comboroomtype.addActionListener((ActionEvent e) -> {
+            conn = mySqlConnection.ConnectDB();
+            JComboBox comboBox = (JComboBox) e.getSource();
+            String selectedRoomType = (String) comboBox.getSelectedItem();
+            String sql = "SELECT room_number, cost FROM room WHERE room_type = ? AND status = 'Available'";
+            
+            try {
+                pst = conn.prepareStatement(sql);
+                pst.setString(1, selectedRoomType);
+                
+                ResultSet result = pst.executeQuery();
+                
+                comboroomno.removeAllItems(); // Clear existing items
+                
+                while (result.next()) {
+                    int roomNumber = result.getInt("room_number");
+                    comboroomno.addItem(String.valueOf(roomNumber));
+                    txtroomcost.setText(String.valueOf(result.getInt("cost")));
+                }
+                
+                
+                pst.close();
+                conn.close();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        });
+    }//GEN-LAST:event_comboroomtypeActionPerformed
 
     /**
      * @param args the command line arguments
@@ -955,6 +989,7 @@ public class checkout extends javax.swing.JFrame {
     private javax.swing.JTable checkoutTable;
     private javax.swing.JComboBox<String> combocity;
     private javax.swing.JComboBox<String> combocountry;
+    private javax.swing.JComboBox<String> comboroomno;
     private javax.swing.JComboBox<String> comboroomtype;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
@@ -990,7 +1025,6 @@ public class checkout extends javax.swing.JFrame {
     private javax.swing.JTextField txtnic;
     private javax.swing.JTextField txtphone;
     private javax.swing.JTextField txtroomcost;
-    private javax.swing.JTextField txtroomno;
     private javax.swing.JTextField txtsearch;
     private javax.swing.JTextField txttax;
     // End of variables declaration//GEN-END:variables
