@@ -132,8 +132,39 @@ public class checkout extends javax.swing.JFrame {
         txtadult.setText(Integer.toString(dataList().get(index).getadult()));
         txtchildren.setText(Integer.toString(dataList().get(index).getchildren()));
         comboroomtype.setSelectedItem(dataList().get(index).getroomtype());
-        comboroomno.setSelectedItem(Integer.toString(dataList().get(index).getroomno()));
-        txtroomcost.setText(Float.toString(dataList().get(index).getroomcost()));
+        
+        comboroomno.removeAllItems();
+        comboroomno.addItem(Integer.toString(dataList().get(index).getroomno()));
+        comboroomno.setSelectedItem(0);
+        
+        conn = mySqlConnection.ConnectDB();
+        PreparedStatement pst = null; // Khai báo PreparedStatement ở đây
+        try {
+            String qry = "SELECT cost FROM room WHERE room_type = ?";
+            pst = conn.prepareStatement(qry);
+            pst.setString(1, dataList().get(index).getroomtype()); // Đặt giá trị cho tham số ở đây
+
+            ResultSet result = pst.executeQuery();
+            while (result.next()) {
+                txtroomcost.setText(String.valueOf(result.getInt("cost")));
+            }
+
+            pst.close();
+            conn.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (pst != null) {
+                    pst.close();
+                }
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        }
         txttax.setText(Float.toString(dataList().get(index).gettaxes()));
         lblTotal.setText(Float.toString(dataList().get(index).gettotal()));
         
@@ -729,8 +760,11 @@ public class checkout extends javax.swing.JFrame {
             pst.close();
             showTable();
             txtname.setText(null);txtfather.setText(null);txtaddress.setText(null);txtnic.setText(null);Date.setDate(null);
-            txtphone.setText(null);combocountry.setSelectedItem(null);combocity.setSelectedItem(null);txtphone.setText(null);
-            txtadult.setText(null);txtchildren.setText(null);comboroomtype.setSelectedItem(null);comboroomno.setSelectedItem(null);
+            txtphone.setText(null);combocountry.setSelectedIndex(0);combocity.setSelectedIndex(0);txtphone.setText(null);
+            txtadult.setText(null);txtchildren.setText(null);comboroomtype.setSelectedIndex(0);
+            comboroomno.removeAllItems();
+            comboroomno.addItem("None");
+            comboroomno.setSelectedIndex(0);
             txttax.setText(null);txtroomcost.setText(null);lblTotal.setText("0.00");
             conn.close();
         }
@@ -912,33 +946,7 @@ public class checkout extends javax.swing.JFrame {
     }//GEN-LAST:event_comboroomnoActionPerformed
 
     private void comboroomtypeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_comboroomtypeActionPerformed
-        comboroomtype.addActionListener((ActionEvent e) -> {
-            conn = mySqlConnection.ConnectDB();
-            JComboBox comboBox = (JComboBox) e.getSource();
-            String selectedRoomType = (String) comboBox.getSelectedItem();
-            String sql = "SELECT room_number, cost FROM room WHERE room_type = ? AND status = 'Available'";
-            
-            try {
-                pst = conn.prepareStatement(sql);
-                pst.setString(1, selectedRoomType);
-                
-                ResultSet result = pst.executeQuery();
-                
-                comboroomno.removeAllItems(); // Clear existing items
-                
-                while (result.next()) {
-                    int roomNumber = result.getInt("room_number");
-                    comboroomno.addItem(String.valueOf(roomNumber));
-                    txtroomcost.setText(String.valueOf(result.getInt("cost")));
-                }
-                
-                
-                pst.close();
-                conn.close();
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-            }
-        });
+        
     }//GEN-LAST:event_comboroomtypeActionPerformed
 
     /**

@@ -228,7 +228,7 @@ public class reservation extends javax.swing.JFrame {
             pst.setString(5, regDate);
             pst.executeUpdate();
             
-            qry = "UPDATE room SET status = 'Occupied' WHERE room_number = ?";
+            qry = "UPDATE room SET status = 'Reserved' WHERE room_number = ?";
             pst = conn.prepareStatement(qry);
             pst.setInt(1, Integer.parseInt(comboroomno.getSelectedItem().toString()));
             pst.executeUpdate();
