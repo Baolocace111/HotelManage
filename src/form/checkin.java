@@ -100,15 +100,43 @@ public class checkin extends javax.swing.JFrame {
         txtname.setText(reservList().get(index).getname());
         txtphone.setText(Long.toString(reservList().get(index).getphone()));
         try {
-            Date addDate = null;
-            addDate = new SimpleDateFormat("yyyy-MM-dd").parse((String) reservList().get(index).getdate());
+            Date addDate = new SimpleDateFormat("yyyy-MM-dd").parse((String) reservList().get(index).getdate());
             this.Date.setDate(addDate);
         } catch (ParseException e) {
             JOptionPane.showMessageDialog(null, "Date and Time Error");
         }
         comboroomtype.setSelectedItem(reservList().get(index).getroomtype());
-        comboroomno.setSelectedItem(Integer.toString(reservList().get(index).getroomno()));
 
+        conn = mySqlConnection.ConnectDB();
+        PreparedStatement pst = null; // Khai báo PreparedStatement ở đây
+        try {
+            String qry = "SELECT cost FROM room WHERE room_type = ?";
+            pst = conn.prepareStatement(qry);
+            pst.setString(1, reservList().get(index).getroomtype()); // Đặt giá trị cho tham số ở đây
+
+            ResultSet result = pst.executeQuery();
+            while (result.next()) {
+                txtroomcost.setText(String.valueOf(result.getInt("cost")));
+            }
+
+            pst.close();
+            conn.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (pst != null) {
+                    pst.close();
+                }
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        }
+        comboroomno.addItem(Integer.toString(reservList().get(index).getroomno()));
+        comboroomno.setSelectedIndex(1);
     }
 
     //
@@ -718,7 +746,7 @@ public class checkin extends javax.swing.JFrame {
         txtadult.setText("");
         txtchildren.setText("");
         comboroomtype.setSelectedIndex(0); // Chọn mục đầu tiên trong combobox để tránh null
-        comboroomno.setSelectedIndex(0);
+        comboroomno.setSelectedItem(null);
         txttax.setText("");
         txtroomcost.setText("");
         lblTotal.setText("0.00");
