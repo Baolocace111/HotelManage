@@ -263,6 +263,54 @@ LOCK TABLES `room_expenses` WRITE;
 /*!40000 ALTER TABLE `room_expenses` DISABLE KEYS */;
 /*!40000 ALTER TABLE `room_expenses` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Dumping events for database 'smarthotel'
+--
+
+--
+-- Dumping routines for database 'smarthotel'
+--
+/*!50003 DROP PROCEDURE IF EXISTS `GenerateRooms` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_AUTO_VALUE_ON_ZERO' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `GenerateRooms`()
+BEGIN
+  DECLARE i INT DEFAULT 1;
+  DECLARE j INT DEFAULT 1;
+  DECLARE room_types VARCHAR(100);
+  
+  WHILE i <= 4 DO
+    WHILE j <= 10 DO
+      SET room_types = CASE FLOOR(RAND() * 5)
+        WHEN 0 THEN 'Single'
+        WHEN 1 THEN 'Double'
+        WHEN 2 THEN 'Luxury'
+        WHEN 3 THEN 'Delux'
+        WHEN 4 THEN 'Family'
+        ELSE 'Single' END;
+      
+      INSERT INTO room (room_number, room_type, floor, status)
+      VALUES (j, room_types, i, 'Available');
+      
+      SET j = j + 1;
+    END WHILE;
+    SET j = 1;
+    SET i = i + 1;
+  END WHILE;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -273,4 +321,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-05-01 22:08:37
+-- Dump completed on 2024-05-01 22:17:00
