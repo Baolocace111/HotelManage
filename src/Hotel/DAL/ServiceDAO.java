@@ -48,9 +48,9 @@ public class ServiceDAO {
     }
 
     public void addRoomService(RoomService[] roomService) throws SQLException {
-        PreparedStatement ps = conn.prepareStatement("INSERT INTO booking_service" +
-                "(sid, bid, rid, bsprice, quantity) "
-                + "VALUES (?, ?, ?, ? ,?)");
+        PreparedStatement ps = conn.prepareStatement("INSERT INTO booking_service"
+                + "(sid, bid, rid, bsprice, quantity, bstime) "
+                + "VALUES (?, ?, ?, ? ,?, CURRENT_TIMESTAMP)");
         for (RoomService i : roomService) {
             ps.setInt(1, i.getServiceId());
             ps.setInt(2, i.getBookingId());
@@ -96,12 +96,22 @@ public class ServiceDAO {
         ps.close();
     }
 
-    public void addServiceeeeee(Service service) throws SQLException {
-        CallableStatement ps = conn.prepareCall("{call spAddService(?, ?, ?)}");
+    public void addService(Service service) throws SQLException {
+        // Chuẩn bị câu truy vấn SQL để thêm dữ liệu vào bảng service
+        String sql = "INSERT INTO service (sname, sunit, sprice) VALUES (?, ?, ?)";
+
+        // Tạo đối tượng PreparedStatement để thực thi truy vấn
+        PreparedStatement ps = conn.prepareStatement(sql);
+
+        // Thiết lập các tham số cho truy vấn
         ps.setString(1, service.getName());
         ps.setString(2, service.getUnit());
         ps.setInt(3, service.getPrice());
-        ps.execute();
+
+        // Thực thi truy vấn
+        ps.executeUpdate();
+
+        // Đóng PreparedStatement
         ps.close();
     }
 
@@ -126,8 +136,8 @@ public class ServiceDAO {
     }
 
     public boolean deleteService(String sid) throws SQLException {
-        PreparedStatement ps = conn.prepareStatement("UPDATE service " +
-                "SET deleted = 1 WHERE sid = ?");
+        PreparedStatement ps = conn.prepareStatement("UPDATE service "
+                + "SET deleted = 1 WHERE sid = ?");
         int success = ps.executeUpdate();
 
         return success == 1;

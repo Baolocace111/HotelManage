@@ -49,7 +49,7 @@ public enum ReportType {
             case DOANH_THU_PHONG:
                 return "SELECT mathuephong, madatphong, tongthanhtoan FROM hosothuephong";
             case DOANH_THU_DICH_VU:
-                return "SELECT s.sname, bs.bstime, bs.quantity, s.sprice, bs.bsprice FROM booking_service bs JOIN service s ON bs.sid = s.sid";
+                return "SELECT s.sname, bs.bstime, bs.quantity, s.sprice, (bs.bsprice * bs.quantity) FROM booking_service bs JOIN service s ON bs.sid = s.sid";
         }
         return null;
     }

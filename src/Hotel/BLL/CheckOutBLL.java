@@ -10,8 +10,6 @@ import Hotel.DTO.Booking;
 import Hotel.DTO.StayProfile;
 import Hotel.DAL.OrderDAO;
 import Hotel.DAL.StayProfileDAO;
-import Hotel.DTO.rooms.Room;
-import Hotel.GUI.CheckOutGUI.CheckOutForm;
 import Hotel.GUI.common.BookingTableModel;
 
 import javax.swing.*;
@@ -22,7 +20,6 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.sql.Timestamp;
-import java.util.stream.Collectors;
 import javax.swing.table.TableModel;
 
 /**
