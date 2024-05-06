@@ -148,7 +148,7 @@ public class ServiceBLL {
             service.setName(tendichvu);
             service.setUnit(donvitinh);
             service.setPrice(nipp);
-            serviceDAO.addServiceeeeee(service);
+            serviceDAO.addService(service);
             JOptionPane.showConfirmDialog(null, "Thêm thành công ", "A GREAT MAN ONCE SAID : ", JOptionPane.OK_OPTION);
         } catch (HotelError ex) {
             ex.notifyError();

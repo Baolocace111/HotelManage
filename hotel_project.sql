@@ -29,14 +29,14 @@ CREATE TABLE `booking` (
   `check_in` datetime DEFAULT NULL,
   `check_out` datetime DEFAULT NULL,
   `deposit` int DEFAULT NULL,
-  `bstatus` int DEFAULT '1',
+  `bstatus` int DEFAULT '0',
   `deleted` int DEFAULT '0',
   `paytime` datetime DEFAULT NULL,
   `total` mediumtext,
   PRIMARY KEY (`bid`),
   KEY `makh_fk_idx` (`cid`),
-  CONSTRAINT `fk1_booking_customer` FOREIGN KEY (`cid`) REFERENCES `customer` (`cid`)
-) ENGINE=InnoDB AUTO_INCREMENT=31 DEFAULT CHARSET=utf8mb3;
+  CONSTRAINT `fk1_booking_customer` FOREIGN KEY (`cid`) REFERENCES `customer` (`cid`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=44 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -45,7 +45,7 @@ CREATE TABLE `booking` (
 
 LOCK TABLES `booking` WRITE;
 /*!40000 ALTER TABLE `booking` DISABLE KEYS */;
-INSERT INTO `booking` VALUES (30,11,'2024-05-05 14:00:00','2024-05-05 14:00:00','2024-05-06 12:00:00',499000,2,0,'2024-05-06 01:53:34','599000');
+INSERT INTO `booking` VALUES (39,20,'2024-05-06 09:22:39','2024-05-06 14:00:00','2024-05-07 12:00:00',499000,2,0,'2024-05-06 09:23:55','698700'),(40,21,'2024-05-06 09:50:18','2024-05-06 14:00:00','2024-05-07 12:00:00',499000,2,0,'2024-05-06 09:51:46','748700'),(41,22,'2024-05-06 12:17:57','2024-05-06 14:00:00','2024-05-07 12:00:00',599000,2,0,'2024-05-06 12:22:26','878700'),(42,23,'2024-05-06 12:37:19','2024-05-03 14:00:00','2024-05-04 12:00:00',599000,2,0,'2024-05-06 12:41:45','2156400'),(43,24,'2024-05-06 12:57:16','2024-05-03 14:00:00','2024-05-04 12:00:00',599000,2,0,'2024-05-06 13:00:42','1976700');
 /*!40000 ALTER TABLE `booking` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -76,6 +76,7 @@ CREATE TABLE `booking_room` (
 
 LOCK TABLES `booking_room` WRITE;
 /*!40000 ALTER TABLE `booking_room` DISABLE KEYS */;
+INSERT INTO `booking_room` VALUES (39,5,499000,'2024-05-06 09:22:50','2024-05-06 09:23:04',149700),(40,1,499000,'2024-05-06 09:50:51','2024-05-06 09:51:13',149700),(41,16,599000,'2024-05-06 12:18:32','2024-05-06 12:19:56',179700),(42,6,599000,'2024-05-03 12:37:38','2024-05-06 12:39:45',359400),(43,16,599000,'2024-05-03 12:58:12','2024-05-06 12:59:16',179700);
 /*!40000 ALTER TABLE `booking_room` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -97,9 +98,9 @@ CREATE TABLE `booking_service` (
   PRIMARY KEY (`bsid`),
   KEY `fk1_booking_idx` (`bid`),
   KEY `fk1_service_idx` (`sid`),
-  CONSTRAINT `fk1_booking_service_booking` FOREIGN KEY (`bid`) REFERENCES `booking` (`bid`),
-  CONSTRAINT `fk2_booking_service_service` FOREIGN KEY (`sid`) REFERENCES `service` (`sid`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3;
+  CONSTRAINT `fk1_booking_service_booking` FOREIGN KEY (`bid`) REFERENCES `booking` (`bid`) ON DELETE CASCADE,
+  CONSTRAINT `fk2_booking_service_service` FOREIGN KEY (`sid`) REFERENCES `service` (`sid`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -108,7 +109,7 @@ CREATE TABLE `booking_service` (
 
 LOCK TABLES `booking_service` WRITE;
 /*!40000 ALTER TABLE `booking_service` DISABLE KEYS */;
-INSERT INTO `booking_service` VALUES (1,30,1,100000,'2024-05-05 23:30:02',4,1);
+INSERT INTO `booking_service` VALUES (5,39,5,50000,'2024-05-06 00:00:00',5,1),(6,40,1,100000,'2024-05-06 00:00:00',1,1),(7,41,5,50000,'2024-05-06 12:20:35',16,2);
 /*!40000 ALTER TABLE `booking_service` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -129,7 +130,7 @@ CREATE TABLE `customer` (
   `deleted` varchar(45) DEFAULT '0',
   PRIMARY KEY (`cid`),
   UNIQUE KEY `cmnd_UNIQUE` (`cidentity`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -138,7 +139,7 @@ CREATE TABLE `customer` (
 
 LOCK TABLES `customer` WRITE;
 /*!40000 ALTER TABLE `customer` DISABLE KEYS */;
-INSERT INTO `customer` VALUES (8,'Bao Loc',0,'079202038243','Thu Duc','0913518753','0'),(9,'Bao Loc',0,'012345678','thu duc','0913517853','0'),(10,'Loc',0,'21412415213','asdfgh','0123456789','0'),(11,'Locc',0,'312412412412','sdawd','0123464387','0');
+INSERT INTO `customer` VALUES (20,'Bao Loc',0,'04124124343','Thu Duc','0913518753','0'),(21,'Bao An',0,'0212412','Thu Duc','0913518753','0'),(22,'Loc Cute',1,'01231242512','Thu Duc','0913518753','0'),(23,'Alice',1,'02934124034','Wolvesville','0913519763','0'),(24,'Lyly',1,'02420535034','Disney','0923423479','0');
 /*!40000 ALTER TABLE `customer` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -165,7 +166,6 @@ CREATE TABLE `hosothuephong` (
 
 LOCK TABLES `hosothuephong` WRITE;
 /*!40000 ALTER TABLE `hosothuephong` DISABLE KEYS */;
-INSERT INTO `hosothuephong` VALUES (30,30,'2024-05-05 23:20:02','2024-05-06 01:53:34',599000);
 /*!40000 ALTER TABLE `hosothuephong` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -181,12 +181,12 @@ CREATE TABLE `room` (
   `rname` varchar(45) DEFAULT NULL,
   `tid` int unsigned DEFAULT NULL,
   `current_booking` int DEFAULT '0',
-  `rstatus` tinyint DEFAULT '0',
+  `rstatus` tinyint DEFAULT '1',
   `deleted` int DEFAULT '0',
   PRIMARY KEY (`rid`),
   UNIQUE KEY `tenphong_UNIQUE` (`rname`),
   KEY `loaiphong_fk_idx` (`tid`)
-) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -195,7 +195,7 @@ CREATE TABLE `room` (
 
 LOCK TABLES `room` WRITE;
 /*!40000 ALTER TABLE `room` DISABLE KEYS */;
-INSERT INTO `room` VALUES (1,'S1',1,0,1,0),(2,'S2',1,0,1,0),(3,'D1',2,0,1,0),(4,'S3',1,0,1,0),(5,'s44',1,0,1,0),(6,'D2',2,0,1,0),(7,'D3',2,0,1,0),(8,'T1',3,0,1,0),(9,'T2',3,0,1,0),(10,'T3',3,0,1,0),(11,'TW1',4,0,1,0),(12,'S5',1,0,1,0),(13,'T4',3,0,1,0),(14,'TW2',4,0,1,0),(15,'TW3',4,0,1,0),(16,'D4',2,0,1,0),(17,'TW4',4,0,1,0);
+INSERT INTO `room` VALUES (1,'S1',1,0,1,0),(2,'S2',1,0,1,0),(3,'D1',2,0,1,0),(4,'S3',1,0,1,0),(5,'S4',1,0,1,0),(6,'D2',2,0,1,0),(7,'D3',2,0,1,0),(8,'T1',3,0,1,0),(9,'T2',3,0,1,0),(10,'T3',3,0,1,0),(11,'TW1',4,0,1,0),(12,'S5',1,0,1,0),(13,'T4',3,0,1,0),(14,'TW2',4,0,1,0),(15,'TW3',4,0,1,0),(16,'D4',2,0,1,0),(17,'TW4',4,0,1,0),(18,'S6',1,0,1,0);
 /*!40000 ALTER TABLE `room` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -240,7 +240,7 @@ CREATE TABLE `service` (
   `sprice` int unsigned DEFAULT NULL,
   `deleted` int DEFAULT '0',
   PRIMARY KEY (`sid`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb3 COMMENT='Dịch vụ';
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb3 COMMENT='Dịch vụ';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -249,17 +249,9 @@ CREATE TABLE `service` (
 
 LOCK TABLES `service` WRITE;
 /*!40000 ALTER TABLE `service` DISABLE KEYS */;
-INSERT INTO `service` VALUES (1,'Giặt ủi','Lượt',100000,0),(4,'Bữa sáng - Thường','Suất',30000,0),(5,'Bữa sáng - Cao cấp','Suất',50000,0);
+INSERT INTO `service` VALUES (1,'Giặt ủi','Lượt',100000,0),(4,'Bữa sáng - Thường','Suất',30000,0),(5,'Bữa sáng - Cao cấp','Suất',50000,0),(6,'Kỹ nữ','Người',500000,0);
 /*!40000 ALTER TABLE `service` ENABLE KEYS */;
 UNLOCK TABLES;
-
---
--- Dumping events for database 'hotel_project'
---
-
---
--- Dumping routines for database 'hotel_project'
---
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -270,4 +262,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-05-06  2:06:49
+-- Dump completed on 2024-05-06 13:06:45
