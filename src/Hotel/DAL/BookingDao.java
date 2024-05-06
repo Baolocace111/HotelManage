@@ -184,49 +184,81 @@ public class BookingDao {
         try {
             conn.setAutoCommit(false);
 
-            PreparedStatement ps = conn.prepareStatement("INSERT INTO booking"
-                    + "(cid, check_in, check_out, deposit, bstatus) VALUES (?, ?, ?, ? ,?)", PreparedStatement.RETURN_GENERATED_KEYS);
+            // Insert new booking
+            PreparedStatement ps = conn.prepareStatement(
+                    "INSERT INTO booking (cid, check_in, check_out, deposit, bstatus, btime) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)",
+                    PreparedStatement.RETURN_GENERATED_KEYS
+            );
             ps.setInt(1, booking.getCustomerId());
             ps.setTimestamp(2, booking.getCheckInTime());
             ps.setTimestamp(3, booking.getCheckOutTime());
             ps.setInt(4, booking.getDeposit());
             ps.setInt(5, booking.getStatus());
             ps.executeUpdate();
+
             ResultSet rs = ps.getGeneratedKeys();
-            rs.next();
-            booking.setId(rs.getInt(1));
+            if (rs.next()) {
+                id = rs.getInt(1);
+                booking.setId(id);
+            }
             rs.close();
             ps.close();
 
-            ps = conn.prepareStatement("INSERT INTO booking_room"
-                    + "(brid, rid, rprice) VALUES (?, ?, ?)");
+            // Insert booking_room with real_checkin and real_checkout
+            ps = conn.prepareStatement(
+                    "INSERT INTO booking_room (brid, rid, rprice, real_checkin, real_checkout) VALUES (?, ?, ?, ?, ?)"
+            );
             for (BookingRoom room : booking.getBookingRooms()) {
-                ps.setInt(1, booking.getId());
+                ps.setInt(1, id); // Use the generated booking ID
                 ps.setInt(2, room.getRoomId());
-                ps.setInt(3, room.getRoomPrice());
+                ps.setDouble(3, room.getRoomPrice());
+                ps.setTimestamp(4, room.getRealCheckIn()); // real_checkin
+                ps.setTimestamp(5, room.getRealCheckOut()); // real_checkout
                 ps.addBatch();
+
+                // Update room status and current_booking
+                PreparedStatement psRoom = conn.prepareStatement(
+                        "UPDATE room SET rstatus = 0, current_booking = ? WHERE rid = ?"
+                );
+                psRoom.setInt(1, id);
+                psRoom.setInt(2, room.getRoomId());
+                psRoom.executeUpdate();
+                psRoom.close();
             }
             ps.executeBatch();
 
             conn.commit();
-            id = booking.getId();
         } catch (SQLException e) {
             e.printStackTrace();
-            conn.rollback();
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
         } finally {
-            conn.setAutoCommit(true);
-            ConnectionPool.releaseConnection(conn);
-            return id;
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                    ConnectionPool.releaseConnection(conn);
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
         }
+        return id;
     }
 
     public void depositBooking(int bookingId) throws SQLException {
         try (Connection conn = ConnectionPool.getconnection()) {
-            int totalAmount = getTotalAmountForBooking(conn, bookingId); // Lấy tổng tiền của booking
-            int depositAmount = totalAmount / 2; // Tính toán số tiền cần đặt cọc (50% của tổng tiền)
-            try (PreparedStatement ps = conn.prepareStatement("UPDATE booking SET deposit = ? WHERE bid = ?")) {
-                ps.setInt(1, depositAmount);
-                ps.setInt(2, bookingId);
+            // Tính tổng tiền của tất cả booking_room cho một booking
+            int totalAmount = getTotalAmountForBooking(conn, bookingId);
+
+            try (PreparedStatement ps = conn.prepareStatement("UPDATE booking SET deposit = ?, bstatus = ? WHERE bid = ?")) {
+                ps.setInt(1, totalAmount); // Cập nhật deposit bằng tổng giá của booking_room
+                ps.setInt(2, 1); // Cập nhật trạng thái của booking thành 1 (đã đặt cọc)
+                ps.setInt(3, bookingId);
                 ps.executeUpdate();
             }
         }
@@ -238,20 +270,20 @@ public class BookingDao {
             conn = ConnectionPool.getconnection();
             conn.setAutoCommit(false);
 
-            // Cập nhật trạng thái check_in trong bảng booking
+            // Update the status of the booking to 2 (Checked In)
             try (PreparedStatement psUpdateBooking = conn.prepareStatement("UPDATE booking SET bstatus = ? WHERE bid = ?")) {
-                psUpdateBooking.setInt(1, 1); // Giả sử 1 là mã trạng thái cho CHECKED_IN
+                psUpdateBooking.setInt(1, 2); // Assuming 2 is the status code for CHECKED_IN
                 psUpdateBooking.setInt(2, bookingId);
                 psUpdateBooking.executeUpdate();
             }
 
-            // Cập nhật thông tin trong bảng booking_room
+            // Update the information in the booking_room table
             try (PreparedStatement psUpdateBookingRoom = conn.prepareStatement("UPDATE booking_room SET real_checkin = ?, surcharge = ? WHERE brid = ?")) {
                 Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
                 psUpdateBookingRoom.setTimestamp(1, currentTimestamp);
 
-                // Tính phí thêm (surcharge) dựa trên tỷ lệ phần trăm và tổng tiền của booking
-                int totalAmount = getTotalAmountForBooking(conn, bookingId); // Hàm này cần được triển khai để tính tổng tiền của booking
+                // Calculate the surcharge based on the percentage rate and the total price of the booking
+                int totalAmount = getTotalAmountForBooking(conn, bookingId);
                 int surchargeAmount = totalAmount * surchargePercent / 100;
                 psUpdateBookingRoom.setInt(2, surchargeAmount);
 
@@ -274,16 +306,15 @@ public class BookingDao {
     }
 
     private int getTotalAmountForBooking(Connection conn, int bookingId) throws SQLException {
-        int totalAmount = 0;
-        try (PreparedStatement ps = conn.prepareStatement("SELECT total FROM booking WHERE bid = ?")) {
+        int total = 0;
+        try (PreparedStatement ps = conn.prepareStatement("SELECT SUM(rprice) AS total FROM booking_room WHERE brid = ?")) {
             ps.setInt(1, bookingId);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    totalAmount = rs.getInt("total");
-                }
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                total = rs.getInt("total");
             }
         }
-        return totalAmount;
+        return total;
     }
 
     public void checkOutRooms(List<Integer> bookingRoomIds, int surchargePercent, boolean pay) throws SQLException {
@@ -338,11 +369,11 @@ public class BookingDao {
                 psUpdateRoom.executeUpdate();
             }
 
-            try (PreparedStatement psReleaseBookingRoom = conn.prepareStatement(
-                    "DELETE FROM booking_room WHERE brid = ?")) {
-                psReleaseBookingRoom.setInt(1, bookingId);
-                psReleaseBookingRoom.executeUpdate();
-            }
+//            try (PreparedStatement psReleaseBookingRoom = conn.prepareStatement(
+//                    "DELETE FROM booking_room WHERE brid = ?")) {
+//                psReleaseBookingRoom.setInt(1, bookingId);
+//                psReleaseBookingRoom.executeUpdate();
+//            }
 
             conn.commit();
         } catch (SQLException ex) {
