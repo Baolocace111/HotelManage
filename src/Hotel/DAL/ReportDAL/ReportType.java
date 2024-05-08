@@ -45,9 +45,12 @@ public enum ReportType {
     public String getSQL() {
         switch (this) {
             case DOANH_SO_DAT_PHONG:
-                return "SELECT ngaydat, madatphong, soluongphong, tongcoc FROM hosothuephong";
+                return "SELECT btime, bid, deposit FROM booking";
             case DOANH_THU_PHONG:
-                return "SELECT mathuephong, madatphong, tongthanhtoan FROM hosothuephong";
+                return "SELECT br.real_checkin, br.real_checkout, br.brid, COUNT(*) AS record_count, SUM(b.total) AS tongthanhtoan "
+                        + "FROM booking_room br "
+                        + "JOIN booking b ON br.brid = b.bid "
+                        + "GROUP BY br.brid";
             case DOANH_THU_DICH_VU:
                 return "SELECT s.sname, bs.bstime, bs.quantity, s.sprice, (bs.bsprice * bs.quantity) FROM booking_service bs JOIN service s ON bs.sid = s.sid";
         }
@@ -68,13 +71,12 @@ public enum ReportType {
     public Object[] getColumnHeader() {
         switch (this) {
             case DOANH_SO_DAT_PHONG:
-                return new Object[]{"Ngày đặt", "Mã đơn", "Số lượng phòng", "Tổng cọc"};
+                return new Object[]{"Ngày đặt", "Mã đơn", "Tổng cọc"};
             case DOANH_THU_PHONG:
-                return new Object[]{"Ngày", "Mã thuê phòng", " Số lượng phòng", " Tổng thanh toán"};
+                return new Object[]{"Ngày Check-in", "Ngày Check-out", "Mã thuê phòng", " Số lượng phòng", " Tổng thanh toán"};
             case DOANH_THU_DICH_VU:
                 return new Object[]{"Tên dịch vụ", "Ngày dùng", "Số lượng", "Đơn giá", "Thành tiền"};
         }
         return null;
     }
-
 }

@@ -66,15 +66,20 @@ public class ReportDAO {
         switch (reportType) {
             case DOANH_SO_DAT_PHONG:
                 // Thêm điều kiện cho báo cáo doanh số đặt phòng
-                sql += " WHERE btime BETWEEN ? AND ? ORDER BY ngaydat"; // Thêm điều kiện ngày đặt phòng
+                sql += " WHERE btime BETWEEN ? AND ? ORDER BY bid"; // Thêm điều kiện ngày đặt phòng
                 break;
             case DOANH_THU_PHONG:
                 // Thêm điều kiện cho báo cáo doanh thu phòng
-                sql += " WHERE paytime BETWEEN ? AND ? AND NOT isnull(paytime) ORDER BY mathuephong"; // Thêm điều kiện ngày thanh toán và không null
+                sql = "SELECT br.real_checkin, br.real_checkout, br.brid, COUNT(*) AS record_count, SUM(b.total) AS tongthanhtoan "
+                        + "FROM booking_room br "
+                        + "JOIN booking b ON br.brid = b.bid "
+                        + "WHERE paytime BETWEEN ? AND ? AND NOT isnull(paytime) " // Điều kiện WHERE
+                        + "GROUP BY br.brid " // GROUP BY sau WHERE
+                        + "ORDER BY brid";
                 break;
             case DOANH_THU_DICH_VU:
                 // Thêm điều kiện cho báo cáo doanh thu dịch vụ
-                sql += " WHERE bstime BETWEEN ? AND ? ORDER BY bs.bstime"; // Thêm điều kiện ngày sử dụng dịch vụ
+                sql += " WHERE bstime BETWEEN ? AND ? ORDER BY bstime"; // Thêm điều kiện ngày sử dụng dịch vụ
                 break;
         }
         PreparedStatement ps = conn.prepareStatement(sql);
@@ -94,6 +99,7 @@ public class ReportDAO {
         // Sử dụng kiểu dữ liệu Timestamp thay vì Date
         ps.setTimestamp(1, new Timestamp(reportCondition.getFrom().getTime())); // Đặt tham số ngày bắt đầu
         ps.setTimestamp(2, new Timestamp(reportCondition.getTo().getTime())); // Đặt tham số ngày kết thúc
+        System.out.println(ps.toString());
         ResultSet rs = ps.executeQuery(); // Thực hiện truy vấn
         return rs; // Trả về kết quả
     }

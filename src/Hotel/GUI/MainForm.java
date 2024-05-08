@@ -252,11 +252,15 @@ public class MainForm extends javax.swing.JFrame {
         // Configure connection to mysql
         try {
             ConnectionPool.configure("jdbc:mysql://localhost:3306/hotel_project"
-                                        + "?useUnicode=yes&characterEncoding=UTF-8",
-                                        "root", "123456");
+                    + "?useUnicode=yes&characterEncoding=UTF-8",
+                    "root", "123456");
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
+        // Phát nhạc nền
+        SoundPlayer.playBackgroundMusic("music.wav");
+
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
