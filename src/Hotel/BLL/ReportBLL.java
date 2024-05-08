@@ -56,44 +56,25 @@ public class ReportBLL {
         model.setColumnIdentifiers(ReportType.DOANH_SO_DAT_PHONG.getColumnHeader());
         try {
             ResultSet rs = reportDAO.getReport(ReportType.DOANH_SO_DAT_PHONG, reportCondition);
-            java.sql.Date dupe = null;
+            java.sql.Date previousDate = null;
             int count = 0;
-            int roomCount = 0;
-            long money = 0;
+            long totalDeposit = 0;
             while (rs.next()) {
-                Object[] obj = new Object[model.getColumnCount()];
-                if (dupe == null) {
-                    obj[0] = rs.getDate(1);
-                    dupe = rs.getDate(1);
+                java.sql.Date currentDate = rs.getDate(1);
+                if (!currentDate.equals(previousDate) && previousDate != null) {
+                    model.addRow(new Object[]{"Tổng cộng", count, totalDeposit});
                     count = 0;
-                    roomCount = 0;
-                    money = 0;
-                } else if (rs.getDate(1).equals(dupe)) {
-                    obj[0] = "";
-                } else {
-                    obj[0] = "Tổng cộng";
-                    obj[1] = count;
-                    obj[2] = roomCount;
-                    obj[3] = money;
-                    model.addRow(obj);
-                    dupe = null;
-                    rs.previous();
-                    continue;
+                    totalDeposit = 0;
                 }
-                obj[1] = rs.getInt(2);
                 count++;
-                obj[2] = rs.getInt(3);
-                roomCount++;
-                obj[3] = rs.getInt(4);
-                money += rs.getInt(4);
-                model.addRow(obj);
+                totalDeposit += rs.getLong(3); // Assuming that the deposit is returned as a long
+                model.addRow(new Object[]{currentDate, rs.getInt(2), rs.getLong(3)});
+                previousDate = currentDate;
             }
-            model.addRow(new Object[]{
-                "Tổng cộng",
-                count,
-                roomCount,
-                money
-            });
+            // Add last total row if resultSet is not empty
+            if (previousDate != null) {
+                model.addRow(new Object[]{"Tổng cộng", count, totalDeposit});
+            }
             rs.getStatement().close();
         } catch (SQLException ex) {
             Logger.getLogger(ReportBLL.class.getName()).log(Level.SEVERE, null, ex);
@@ -106,44 +87,36 @@ public class ReportBLL {
         model.setColumnIdentifiers(ReportType.DOANH_THU_PHONG.getColumnHeader());
         try {
             ResultSet rs = reportDAO.getReport(ReportType.DOANH_THU_PHONG, reportCondition);
-            java.sql.Date dupe = null;
-            int count = 0;
-            int roomCount = 0;
-            long money = 0;
+            java.sql.Date previousCheckin = null;
+            long totalPayment = 0;
+            int totalRoomCount = 0;
             while (rs.next()) {
-                Object[] obj = new Object[model.getColumnCount()];
-                if (dupe == null) {
-                    obj[0] = rs.getDate(1);
-                    dupe = rs.getDate(1);
-                    count = 0;
-                    roomCount = 0;
-                    money = 0;
-                } else if (rs.getDate(1).equals(dupe)) {
-                    obj[0] = "";
-                } else {
-                    obj[0] = "Tổng cộng";
-                    obj[1] = count;
-                    obj[2] = roomCount;
-                    obj[3] = money;
-                    model.addRow(obj);
-                    dupe = null;
-                    rs.previous();
-                    continue;
+                java.sql.Date currentCheckin = rs.getDate(1);
+                if (!currentCheckin.equals(previousCheckin) && previousCheckin != null) {
+                    // Khi chúng ta gặp một ngày check-in mới, thêm dòng tổng cộng cho ngày trước đó
+                    model.addRow(new Object[]{"Tổng cộng", "", "", totalRoomCount, totalPayment});
+                    totalRoomCount = 0;
+                    totalPayment = 0;
                 }
-                obj[1] = rs.getInt(2);
-                count++;
-                obj[2] = rs.getInt(3);
-                roomCount++;
-                obj[3] = rs.getInt(4);
-                money += rs.getInt(4);
+                int roomCount = rs.getInt(4); // Assuming the count of rooms is the fourth column
+                long payment = rs.getLong(5); // Assuming the payment amount is the fifth column
+                Object[] obj = new Object[]{
+                    rs.getDate(1), // Check-in date
+                    rs.getDate(2), // Check-out date
+                    rs.getInt(3), // Room ID
+                    roomCount,
+                    payment
+                };
                 model.addRow(obj);
+
+                totalRoomCount += roomCount;
+                totalPayment += payment;
+                previousCheckin = currentCheckin;
             }
-            model.addRow(new Object[]{
-                "Tổng cộng",
-                count,
-                roomCount,
-                money
-            });
+            // Add last total row if resultSet is not empty
+            if (previousCheckin != null) {
+                model.addRow(new Object[]{"Tổng cộng", "", "", totalRoomCount, totalPayment});
+            }
             rs.getStatement().close();
         } catch (SQLException ex) {
             Logger.getLogger(ReportBLL.class.getName()).log(Level.SEVERE, null, ex);
